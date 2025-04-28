@@ -5,7 +5,7 @@ import { request } from 'some-request-library'; // Ensure to import the request 
 
 interface Class {
   id: string;
-  name: string;
+  //name: string;
   teachers: string[];
   grade: string;
   students: string[];
@@ -13,13 +13,13 @@ interface Class {
 }
 
 const mockClasses: Class[] = [
-  { id: '1', name: 'Mathematics A', teachers: ['John Doe', 'Jane Smith'], grade: 'Grade 1', students: ['Student A', 'Student B'], schedule: 'Mon, Wed 9:00 AM' },
-  { id: '2', name: 'Physics B', teachers: ['Mike Johnson', 'Emily Davis'], grade: 'Grade 2', students: ['Student C', 'Student D'], schedule: 'Tue, Thu 10:30 AM' },
-  { id: '3', name: 'Chemistry C', teachers: ['Chris Brown'], grade: 'Grade 3', students: ['Student E', 'Student F'], schedule: 'Mon, Fri 2:00 PM' },
-  { id: '4', name: 'Biology D', teachers: ['Sarah Wilson'], grade: 'Grade 4', students: ['Student G', 'Student H'], schedule: 'Tue, Thu 1:00 PM' },
-  { id: '5', name: 'History E', teachers: ['David Lee'], grade: 'Grade 5', students: ['Student I', 'Student J'], schedule: 'Mon, Wed 11:00 AM' },
-  { id: '6', name: 'Geography F', teachers: ['John Doe', 'Jane Smith'], grade: 'Grade 6', students: ['Student K', 'Student L'], schedule: 'Fri 10:00 AM' },
-  { id: '7', name: 'Literature G', teachers: ['Mike Johnson'], grade: 'Grade 7', students: ['Student M', 'Student N'], schedule: 'Mon, Wed 2:00 PM' },
+  { id: '1',  teachers: ['John Doe', 'Jane Smith'], grade: 'Grade 1', students: ['Student A', 'Student B'], schedule: 'Mon, Wed 9:00 AM' },
+  { id: '2', teachers: ['Mike Johnson', 'Emily Davis'], grade: 'Grade 2', students: ['Student C', 'Student D'], schedule: 'Tue, Thu 10:30 AM' },
+  { id: '3', teachers: ['Chris Brown'], grade: 'Grade 3', students: ['Student E', 'Student F'], schedule: 'Mon, Fri 2:00 PM' },
+  { id: '4',  teachers: ['Sarah Wilson'], grade: 'Grade 4', students: ['Student G', 'Student H'], schedule: 'Tue, Thu 1:00 PM' },
+  { id: '5',  teachers: ['David Lee'], grade: 'Grade 5', students: ['Student I', 'Student J'], schedule: 'Mon, Wed 11:00 AM' },
+  { id: '6', teachers: ['John Doe', 'Jane Smith'], grade: 'Grade 6', students: ['Student K', 'Student L'], schedule: 'Fri 10:00 AM' },
+  { id: '7', teachers: ['Mike Johnson'], grade: 'Grade 7', students: ['Student M', 'Student N'], schedule: 'Mon, Wed 2:00 PM' },
 ];
 
 export default function Classes() {
@@ -80,7 +80,7 @@ export default function Classes() {
             {classItems.map((classItem) => (
               <div key={classItem.id} className="p-6">
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-semibold text-gray-900">{classItem.name}</h3>
+                  <h3 className="text-xl font-semibold text-gray-900"></h3>
                   <div className="flex gap-2">
                     <button className="text-blue-600 hover:text-blue-800">
                       <PencilLine size={18} />
