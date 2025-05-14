@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { BookOpen, Search, Plus, Users, Clock, Trash2, PencilLine } from 'lucide-react';
 import BackButton from '../../components/BackButton';
-import { request } from 'some-request-library'; // Ensure to import the request if needed
 
 interface Class {
   id: string;
@@ -11,7 +10,7 @@ interface Class {
   schedule: string;
 }
 
-const mockClasses: Class[] = [
+const mockClassesInitial: Class[] = [
   { id: '1', teachers: ['John Doe', 'Jane Smith'], grade: 'Grade 1', students: ['Student A', 'Student B'], schedule: 'Mon, Wed 9:00 AM' },
   { id: '2', teachers: ['Mike Johnson', 'Emily Davis'], grade: 'Grade 1', students: ['Student C', 'Student D'], schedule: 'Tue, Thu 10:30 AM' },
   { id: '3', teachers: ['Chris Brown'], grade: 'Grade 2', students: ['Student E', 'Student F'], schedule: 'Mon, Fri 2:00 PM' },
@@ -22,7 +21,31 @@ const mockClasses: Class[] = [
 ];
 
 export default function Classes() {
+  const [classes, setClasses] = useState<Class[]>(mockClassesInitial);
   const [showAddClass, setShowAddClass] = useState(false);
+  const [newClassName, setNewClassName] = useState('');
+  const [newClassGrade, setNewClassGrade] = useState('1');
+  const [newClassTeacher, setNewClassTeacher] = useState('John Doe');
+  const [newClassScheduleDay, setNewClassScheduleDay] = useState('monday');
+  const [newClassScheduleTime, setNewClassScheduleTime] = useState('09:00');
+
+  const handleAddClassSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newClass: Class = {
+      id: (classes.length + 1).toString(),
+      teachers: [newClassTeacher],
+      grade: `Grade ${newClassGrade}`,
+      students: [],
+      schedule: `${newClassScheduleDay.charAt(0).toUpperCase() + newClassScheduleDay.slice(1)}, ${newClassScheduleTime}`,
+    };
+    setClasses([...classes, newClass]);
+    setShowAddClass(false);
+    setNewClassName('');
+    setNewClassGrade('1');
+    setNewClassTeacher('John Doe');
+    setNewClassScheduleDay('monday');
+    setNewClassScheduleTime('09:00');
+  };
 
   return (
     <div className="p-8">
@@ -68,7 +91,7 @@ export default function Classes() {
 
       {/* Classes Grid */}
       <div className="grid grid-cols-1 gap-6">
-        {Object.entries(mockClasses.reduce((acc: Record<string, Class[]>, classItem) => {
+        {Object.entries(classes.reduce((acc: Record<string, Class[]>, classItem) => {
           const grade = classItem.grade;
           acc[grade] = acc[grade] || [];
           acc[grade].push(classItem);
@@ -79,7 +102,7 @@ export default function Classes() {
             {classItems.map((classItem) => (
               <div key={classItem.id} className="p-6">
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-semibold text-gray-900"></h3>
+                  <h3 className="text-xl font-semibold text-gray-900">{classItem.teachers.join(', ')}</h3>
                   <div className="flex gap-2">
                     <button className="text-blue-600 hover:text-blue-800">
                       <PencilLine size={18} />
@@ -92,15 +115,11 @@ export default function Classes() {
                 <div className="space-y-3">
                   <div className="flex items-center text-gray-600">
                     <Users className="h-5 w-5 mr-2" />
-                    <span>Teachers: {classItem.teachers.join(', ')}</span>
+                    <span>{classItem.students.length} Students</span>
                   </div>
                   <div className="flex items-center text-gray-600">
                     <BookOpen className="h-5 w-5 mr-2" />
                     <span>{classItem.grade}</span>
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <Users className="h-5 w-5 mr-2" />
-                    <span>{classItem.students.join(', ')} Students</span>
                   </div>
                   <div className="flex items-center text-gray-600">
                     <Clock className="h-5 w-5 mr-2" />
@@ -123,17 +142,24 @@ export default function Classes() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h2 className="text-2xl font-bold mb-4">Add New Class</h2>
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleAddClassSubmit}>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Class Name</label>
                 <input
                   type="text"
+                  value={newClassName}
+                  onChange={(e) => setNewClassName(e.target.value)}
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Grade Level</label>
-                <select className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select
+                  value={newClassGrade}
+                  onChange={(e) => setNewClassGrade(e.target.value)}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
                   <option value="1">Grade 1</option>
                   <option value="2">Grade 2</option>
                   <option value="3">Grade 3</option>
@@ -145,16 +171,24 @@ export default function Classes() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Assign Teacher</label>
-                <select className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="1">John Doe</option>
-                  <option value="2">Jane Smith</option>
-                  <option value="3">Mike Johnson</option>
+                <select
+                  value={newClassTeacher}
+                  onChange={(e) => setNewClassTeacher(e.target.value)}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="John Doe">John Doe</option>
+                  <option value="Jane Smith">Jane Smith</option>
+                  <option value="Mike Johnson">Mike Johnson</option>
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Schedule</label>
                 <div className="grid grid-cols-2 gap-4">
-                  <select className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <select
+                    value={newClassScheduleDay}
+                    onChange={(e) => setNewClassScheduleDay(e.target.value)}
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
                     <option value="monday">Monday</option>
                     <option value="tuesday">Tuesday</option>
                     <option value="wednesday">Wednesday</option>
@@ -163,6 +197,8 @@ export default function Classes() {
                   </select>
                   <input
                     type="time"
+                    value={newClassScheduleTime}
+                    onChange={(e) => setNewClassScheduleTime(e.target.value)}
                     className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>

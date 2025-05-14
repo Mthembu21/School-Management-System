@@ -24,7 +24,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         
         {/* Admin Routes */}
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/*" element={<AdminDashboard />} />
         <Route path="/admin/users" element={<Users />} />
         <Route path="/admin/classes" element={<Classes />} />
         <Route path="/admin/timetable" element={<Timetable />} />
