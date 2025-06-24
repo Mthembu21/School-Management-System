@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import { Users, BookOpen, Calendar, Bell, TrendingUp, School, Mail, Phone, Globe, MapPin } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
@@ -125,26 +125,31 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
               <div className="grid grid-cols-2 gap-4">
-                <button className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left">
+                <Link to="/admin/users" className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left">
                   <Users className="h-6 w-6 text-blue-600 mb-2" />
                   <h3 className="font-medium text-gray-900">Manage Users</h3>
                   <p className="text-sm text-gray-600 mt-1">Add or update user accounts</p>
-                </button>
-                <button className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left">
+                </Link>
+                <Link to="/admin/timetable" className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left">
                   <Calendar className="h-6 w-6 text-green-600 mb-2" />
                   <h3 className="font-medium text-gray-900">Schedule Classes</h3>
                   <p className="text-sm text-gray-600 mt-1">Manage class timetables</p>
-                </button>
-                <button className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left">
+                </Link>
+                <Link to="/admin/classes" className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left">
                   <BookOpen className="h-6 w-6 text-purple-600 mb-2" />
                   <h3 className="font-medium text-gray-900">Manage Classes</h3>
                   <p className="text-sm text-gray-600 mt-1">Update class information</p>
-                </button>
-                <button className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left">
+                </Link>
+                <Link to="/admin/announcements" className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left">
                   <Bell className="h-6 w-6 text-yellow-600 mb-2" />
                   <h3 className="font-medium text-gray-900">Announcements</h3>
                   <p className="text-sm text-gray-600 mt-1">Post new announcements</p>
-                </button>
+                </Link>
+                <Link to="/admin/communication" className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left">
+                  <Mail className="h-6 w-6 text-indigo-600 mb-2" />
+                  <h3 className="font-medium text-gray-900">Send Communication</h3>
+                  <p className="text-sm text-gray-600 mt-1">Send messages to parents</p>
+                </Link>
               </div>
             </div>
           </div>

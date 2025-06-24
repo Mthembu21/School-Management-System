@@ -9,6 +9,7 @@ import Classes from './pages/admin/Classes';
 import Timetable from './pages/admin/Timetable';
 import Announcements from './pages/admin/Announcements';
 import Settings from './pages/admin/Settings';
+import CommunicationDemo from './pages/admin/CommunicationDemo';
 import { useAuthStore } from './stores/authStore';
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
         <Route path="/admin/timetable" element={<Timetable />} />
         <Route path="/admin/announcements" element={<Announcements />} />
         <Route path="/admin/settings" element={<Settings />} />
+        <Route path="/admin/communication" element={<CommunicationDemo />} />
         
         {/* Teacher Routes */}
         <Route path="/teacher/*" element={<TeacherDashboard />} />
