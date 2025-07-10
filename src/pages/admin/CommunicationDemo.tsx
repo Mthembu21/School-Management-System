@@ -4,24 +4,70 @@ import BackButton from '../../components/BackButton';
 interface Parent {
   id: string;
   name: string;
-  grade: string;
   phone: string;
   whatsapp: string;
   email: string;
 }
 
-const dummyParents: Parent[] = [
-  { id: '1', name: 'Alice Johnson', grade: 'Grade 1', phone: '123-456-7890', whatsapp: '123-456-7890', email: 'alice.johnson@example.com' },
-  { id: '2', name: 'Bob Smith', grade: 'Grade 1', phone: '234-567-8901', whatsapp: '234-567-8901', email: 'bob.smith@example.com' },
-  { id: '3', name: 'Carol Williams', grade: 'Grade 2', phone: '345-678-9012', whatsapp: '345-678-9012', email: 'carol.williams@example.com' },
-  { id: '4', name: 'David Brown', grade: 'Grade 2', phone: '456-789-0123', whatsapp: '456-789-0123', email: 'david.brown@example.com' },
-  { id: '5', name: 'Eva Davis', grade: 'Grade 3', phone: '567-890-1234', whatsapp: '567-890-1234', email: 'eva.davis@example.com' },
+interface Student {
+  id: string;
+  name: string;
+  grade: string;
+  parents: Parent[];
+}
+
+const dummyStudents: Student[] = [
+  {
+    id: 's1',
+    name: 'John Doe',
+    grade: 'Grade 1',
+    parents: [
+      { id: 'p1', name: 'Jane Doe', phone: '123-456-7890', whatsapp: '123-456-7890', email: 'jane.doe@example.com' },
+      { id: 'p2', name: 'Jim Doe', phone: '123-456-7891', whatsapp: '123-456-7891', email: 'jim.doe@example.com' },
+    ],
+  },
+  {
+    id: 's2',
+    name: 'Mary Smith',
+    grade: 'Grade 1',
+    parents: [
+      { id: 'p3', name: 'Anna Smith', phone: '234-567-8901', whatsapp: '234-567-8901', email: 'anna.smith@example.com' },
+    ],
+  },
+  {
+    id: 's3',
+    name: 'Peter Johnson',
+    grade: 'Grade 2',
+    parents: [
+      { id: 'p4', name: 'Paul Johnson', phone: '345-678-9012', whatsapp: '345-678-9012', email: 'paul.johnson@example.com' },
+    ],
+  },
+  {
+    id: 's4',
+    name: 'Lucy Brown',
+    grade: 'Grade 3',
+    parents: [
+      { id: 'p5', name: 'Laura Brown', phone: '456-789-0123', whatsapp: '456-789-0123', email: 'laura.brown@example.com' },
+    ],
+  },
+  // Add more students for grades 4 to 7 as needed
 ];
 
-const grades = Array.from(new Set(dummyParents.map(p => p.grade)));
+const grades = [
+  'Grade 1',
+  'Grade 2',
+  'Grade 3',
+  'Grade 4',
+  'Grade 5',
+  'Grade 6',
+  'Grade 7',
+];
 
 export default function CommunicationDemo() {
   const [selectedGrade, setSelectedGrade] = useState<string>(grades[0]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [selectedParents, setSelectedParents] = useState<string[]>([]);
   const [methods, setMethods] = useState<{ sms: boolean; whatsapp: boolean; email: boolean }>({
     sms: false,
@@ -30,29 +76,35 @@ export default function CommunicationDemo() {
   });
   const [message, setMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [allSelected, setAllSelected] = useState(false);
-
-  const parentsInSelectedGrade = dummyParents.filter(p => p.grade === selectedGrade);
 
   useEffect(() => {
-    setAllSelected(parentsInSelectedGrade.length > 0 && parentsInSelectedGrade.every(p => selectedParents.includes(p.id)));
-  }, [selectedParents, selectedGrade]);
+    const filtered = dummyStudents.filter(
+      (student) =>
+        student.grade === selectedGrade &&
+        student.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredStudents(filtered);
+    setSelectedStudents([]);
+    setSelectedParents([]);
+  }, [selectedGrade, searchTerm]);
 
-  const toggleParentSelection = (id: string) => {
-    setSelectedParents((prev) =>
-      prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
+  const toggleStudentSelection = (studentId: string) => {
+    setSelectedStudents((prev) =>
+      prev.includes(studentId) ? prev.filter((id) => id !== studentId) : [...prev, studentId]
     );
   };
 
-  const toggleAllParents = () => {
-    if (allSelected) {
-      setSelectedParents((prev) => prev.filter(id => !parentsInSelectedGrade.some(p => p.id === id)));
-    } else {
-      const newSelections = parentsInSelectedGrade.map(p => p.id);
-      setSelectedParents((prev) => Array.from(new Set([...prev, ...newSelections])));
-    }
-    setAllSelected(!allSelected);
-  };
+  useEffect(() => {
+    // Update selectedParents based on selectedStudents
+    const parentsSet = new Set<string>();
+    selectedStudents.forEach((studentId) => {
+      const student = dummyStudents.find((s) => s.id === studentId);
+      if (student) {
+        student.parents.forEach((parent) => parentsSet.add(parent.id));
+      }
+    });
+    setSelectedParents(Array.from(parentsSet));
+  }, [selectedStudents]);
 
   const toggleMethod = (method: keyof typeof methods) => {
     setMethods((prev) => ({ ...prev, [method]: !prev[method] }));
@@ -60,7 +112,7 @@ export default function CommunicationDemo() {
 
   const handleSend = () => {
     if (selectedParents.length === 0) {
-      alert('Please select at least one parent.');
+      alert('Please select at least one student to send communication to their parents.');
       return;
     }
     if (!methods.sms && !methods.whatsapp && !methods.email) {
@@ -72,14 +124,17 @@ export default function CommunicationDemo() {
       return;
     }
     setSuccessMessage(
-      "Message sent to " + selectedParents.length + " parent(s) via " + Object.entries(methods)
+      "Message sent to parents of " + selectedStudents.length + " student(s) via " + Object.entries(methods)
         .filter(([_, v]) => v)
         .map(([k]) => k.toUpperCase())
         .join(", ") + "."
     );
+    setSelectedStudents([]);
     setSelectedParents([]);
     setMethods({ sms: false, whatsapp: false, email: false });
     setMessage('');
+    setSearchTerm('');
+    setFilteredStudents([]);
     setTimeout(() => setSuccessMessage(''), 5000);
   };
 
@@ -91,6 +146,7 @@ export default function CommunicationDemo() {
         Send communication to parents via SMS, WhatsApp, or Email.
       </p>
 
+      {/* Grade Selection */}
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-2">Select Grade</h2>
         <div className="flex gap-4">
@@ -99,7 +155,7 @@ export default function CommunicationDemo() {
               key={grade}
               onClick={() => {
                 setSelectedGrade(grade);
-                setSelectedParents([]);
+                setSearchTerm('');
               }}
               className={`px-4 py-2 rounded-lg border ${
                 selectedGrade === grade ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-800 border-gray-300'
@@ -111,35 +167,38 @@ export default function CommunicationDemo() {
         </div>
       </div>
 
+      {/* Student Search */}
       <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">Select Parents in {selectedGrade}</h2>
-        <label className="flex items-center gap-3 cursor-pointer select-none mb-2">
-          <input
-            type="checkbox"
-            checked={allSelected}
-            onChange={toggleAllParents}
-            className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-          />
-          <span className="text-gray-800 font-semibold">All Parents</span>
-        </label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-64 overflow-y-auto border border-gray-300 rounded p-4 bg-white">
-          {parentsInSelectedGrade.map((parent) => (
-            <label
-              key={parent.id}
-              className="flex items-center gap-3 cursor-pointer select-none"
-            >
-              <input
-                type="checkbox"
-                checked={selectedParents.includes(parent.id)}
-                onChange={() => toggleParentSelection(parent.id)}
-                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="text-gray-800">{parent.name}</span>
-            </label>
-          ))}
-        </div>
+        <h2 className="text-xl font-semibold mb-2">Search Students in {selectedGrade}</h2>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search students by name..."
+          className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
+      {/* Student List */}
+      <div className="mb-6 max-h-64 overflow-y-auto border border-gray-300 rounded p-4 bg-white">
+        {filteredStudents.length === 0 ? (
+          <p className="text-gray-600">No students found.</p>
+        ) : (
+          filteredStudents.map((student) => (
+            <label key={student.id} className="flex items-center gap-3 cursor-pointer select-none mb-2">
+              <input
+                type="checkbox"
+                checked={selectedStudents.includes(student.id)}
+                onChange={() => toggleStudentSelection(student.id)}
+                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-gray-800">{student.name}</span>
+            </label>
+          ))
+        )}
+      </div>
+
+      {/* Communication Methods */}
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-2">Select Communication Methods</h2>
         <div className="flex gap-6">
@@ -173,6 +232,7 @@ export default function CommunicationDemo() {
         </div>
       </div>
 
+      {/* Message Input */}
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-2">Message</h2>
         <textarea
@@ -184,6 +244,7 @@ export default function CommunicationDemo() {
         />
       </div>
 
+      {/* Send Button */}
       <div className="flex justify-end">
         <button
           onClick={handleSend}
@@ -193,6 +254,7 @@ export default function CommunicationDemo() {
         </button>
       </div>
 
+      {/* Success Message */}
       {successMessage && (
         <div className="mt-6 p-4 bg-green-100 text-green-800 rounded">
           {successMessage}
