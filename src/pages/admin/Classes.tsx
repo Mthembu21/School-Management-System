@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { BookOpen, Search, Plus, Users, Trash2, PencilLine } from 'lucide-react';
 import BackButton from '../../components/BackButton';
+import StudentUploader from '../../components/StudentUploader';
 
 interface Class {
   id: string;
@@ -49,6 +50,25 @@ const currentUserClassId = '3';
 
 const Classes = () => {
   const [showUploader, setShowUploader] = useState(false);
+  const [selectedGrade, setSelectedGrade] = useState('');
+  const [showAddClassModal, setShowAddClassModal] = useState(false);
+  const [showUploaderForGrades, setShowUploaderForGrades] = useState<Record<string, boolean>>({});
+  const [newClass, setNewClass] = useState({
+    grade: '',
+    section: '',
+    venue: '',
+    teachers: [''],
+  });
+  
+  // Helper function to toggle uploader for a specific grade
+  const toggleUploaderForGrade = (grade: string) => {
+    setShowUploaderForGrades(prev => ({
+      ...prev,
+      [grade]: !prev[grade]
+    }));
+    setSelectedGrade(grade);
+    setShowUploader(false);
+  };
 
   return (
     <div className="p-8">
@@ -63,12 +83,16 @@ const Classes = () => {
         </div>
         <div className="flex gap-4">
           <button
-            onClick={() => setShowUploader(!showUploader)}
+            onClick={() => {
+              setShowUploader(!showUploader);
+              setSelectedGrade('');
+            }}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
           >
             Upload Students
           </button>
           <button
+            onClick={() => setShowAddClassModal(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
           >
             <Plus size={20} />
@@ -78,7 +102,9 @@ const Classes = () => {
       </div>
 
       {showUploader ? (
-        <div> {/* Placeholder for StudentUploader component if needed */} </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+          <StudentUploader grade={selectedGrade || "All Grades"} />
+        </div>
       ) : (
         <>
           <div className="bg-white p-4 rounded-lg shadow-sm mb-6 flex items-center gap-4">
@@ -111,7 +137,7 @@ const Classes = () => {
                 return acc;
               }, {} as Record<string, Class[]>)
             ).map(([grade, classItems]) => {
-              const [showUploaderForGrade, setShowUploaderForGrade] = React.useState(false);
+              const showUploaderForGrade = showUploaderForGrades[grade] || false;
 
               return (
                 <div
@@ -123,14 +149,16 @@ const Classes = () => {
                       {grade} ({gradeSummary[grade].totalClasses} classes, {gradeSummary[grade].totalStudents} students)
                     </h2>
                     <button
-                      onClick={() => setShowUploaderForGrade(!showUploaderForGrade)}
+                      onClick={() => toggleUploaderForGrade(grade)}
                       className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                     >
                       Upload Students
                     </button>
                   </div>
                   {showUploaderForGrade ? (
-                    <div> {/* Placeholder for uploader component if needed */} </div>
+                    <div className="p-4 border-t border-gray-200">
+                      <StudentUploader grade={grade} />
+                    </div>
                   ) : (
                     <>
                       {classItems.map((classItem) => (
@@ -176,6 +204,91 @@ const Classes = () => {
             })}
           </div>
         </>
+      )}
+      
+      {/* Add Class Modal */}
+      {showAddClassModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-2xl font-bold mb-4">Add New Class</h2>
+            
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Grade</label>
+              <select 
+                className="w-full p-2 border rounded-lg"
+                value={newClass.grade}
+                onChange={(e) => setNewClass({...newClass, grade: e.target.value})}
+              >
+                <option value="">Select Grade</option>
+                <option value="Grade 1">Grade 1</option>
+                <option value="Grade 2">Grade 2</option>
+                <option value="Grade 3">Grade 3</option>
+                <option value="Grade 4">Grade 4</option>
+                <option value="Grade 5">Grade 5</option>
+                <option value="Grade 6">Grade 6</option>
+                <option value="Grade 7">Grade 7</option>
+              </select>
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Section</label>
+              <input 
+                type="text" 
+                className="w-full p-2 border rounded-lg"
+                value={newClass.section}
+                onChange={(e) => setNewClass({...newClass, section: e.target.value})}
+                placeholder="A, B, C, etc."
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Venue</label>
+              <input 
+                type="text" 
+                className="w-full p-2 border rounded-lg"
+                value={newClass.venue}
+                onChange={(e) => setNewClass({...newClass, venue: e.target.value})}
+                placeholder="Room number"
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Teacher</label>
+              <input 
+                type="text" 
+                className="w-full p-2 border rounded-lg"
+                value={newClass.teachers[0]}
+                onChange={(e) => setNewClass({...newClass, teachers: [e.target.value]})}
+                placeholder="Teacher name"
+              />
+            </div>
+            
+            <div className="flex justify-end gap-2">
+              <button 
+                onClick={() => setShowAddClassModal(false)}
+                className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  // Here you would normally save the new class data
+                  // For now, just close the modal
+                  setShowAddClassModal(false);
+                  setNewClass({
+                    grade: '',
+                    section: '',
+                    venue: '',
+                    teachers: [''],
+                  });
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Save Class
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
