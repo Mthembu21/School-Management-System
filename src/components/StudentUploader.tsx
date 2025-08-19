@@ -50,6 +50,16 @@ const StudentUploader = ({ grade }: StudentUploaderProps) => {
     <div className="p-8">
       <h1 className="text-2xl font-bold mb-6">Student Upload for {grade}</h1>
 
+      <div className="mb-4">
+        <a
+          href="/src/data/ExampleStudentUpload.csv"
+          download="ExampleStudentUpload.csv"
+          className="text-blue-600 underline mb-4 block"
+        >
+          Download Example Excel File
+        </a>
+      </div>
+
       <div className="flex items-center gap-4 mb-6">
         <label className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
           Upload Excel

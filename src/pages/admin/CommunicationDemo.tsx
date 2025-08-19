@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BackButton from '../../components/BackButton';
+import { mockClasses } from '../../data/mockClasses';
 
 interface Parent {
   id: string;
@@ -14,6 +15,14 @@ interface Student {
   name: string;
   grade: string;
   parents: Parent[];
+}
+
+interface SGBMember {
+  id: string;
+  name: string;
+  phone: string;
+  whatsapp: string;
+  email: string;
 }
 
 const dummyStudents: Student[] = [
@@ -63,6 +72,26 @@ const grades = [
   'Grade 7',
 ];
 
+// Dummy SGB members list
+const dummySGBMembers: SGBMember[] = [
+  { id: 'sgb1', name: 'Alice Cooper', phone: '555-123-4567', whatsapp: '555-123-4567', email: 'alice.cooper@example.com' },
+  { id: 'sgb2', name: 'Bob Marley', phone: '555-234-5678', whatsapp: '555-234-5678', email: 'bob.marley@example.com' },
+  { id: 'sgb3', name: 'Charlie Chaplin', phone: '555-345-6789', whatsapp: '555-345-6789', email: 'charlie.chaplin@example.com' },
+];
+
+// Extract unique teachers from mockClasses
+const uniqueTeachers = Array.from(
+  new Set(
+    mockClasses.flatMap((cls) => cls.teachers)
+  )
+).map((teacherName, index) => ({
+  id: `t${index + 1}`,
+  name: teacherName,
+  phone: '', // Phone and other contact info can be added if available
+  whatsapp: '',
+  email: '',
+}));
+
 export default function CommunicationDemo() {
   const [selectedGrade, setSelectedGrade] = useState<string>(grades[0]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,6 +105,11 @@ export default function CommunicationDemo() {
   });
   const [message, setMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+
+  // New state for recipient groups
+  const [sendToAllParents, setSendToAllParents] = useState(false);
+  const [sendToSGBMembers, setSendToSGBMembers] = useState(false);
+  const [sendToTeachers, setSendToTeachers] = useState(false);
 
   useEffect(() => {
     const filtered = dummyStudents.filter(
@@ -111,8 +145,27 @@ export default function CommunicationDemo() {
   };
 
   const handleSend = () => {
-    if (selectedParents.length === 0) {
-      alert('Please select at least one student to send communication to their parents.');
+    // Compile recipients based on selections
+    let recipientsSet = new Set<string>();
+
+    if (sendToAllParents) {
+      dummyStudents.forEach((student) => {
+        student.parents.forEach((parent) => recipientsSet.add(parent.id));
+      });
+    } else {
+      selectedParents.forEach((parentId) => recipientsSet.add(parentId));
+    }
+
+    if (sendToSGBMembers) {
+      dummySGBMembers.forEach((member) => recipientsSet.add(member.id));
+    }
+
+    if (sendToTeachers) {
+      uniqueTeachers.forEach((teacher) => recipientsSet.add(teacher.id));
+    }
+
+    if (recipientsSet.size === 0) {
+      alert('Please select at least one recipient group or student to send communication.');
       return;
     }
     if (!methods.sms && !methods.whatsapp && !methods.email) {
@@ -123,14 +176,25 @@ export default function CommunicationDemo() {
       alert('Please enter a message.');
       return;
     }
+
+    // Here you would map recipient ids to actual contact info for sending
+    // For demo, just show success message with counts
+    let recipientCount = recipientsSet.size;
+    let methodList = Object.entries(methods)
+      .filter(([_, v]) => v)
+      .map(([k]) => k.toUpperCase())
+      .join(', ');
+
     setSuccessMessage(
-      "Message sent to parents of " + selectedStudents.length + " student(s) via " + Object.entries(methods)
-        .filter(([_, v]) => v)
-        .map(([k]) => k.toUpperCase())
-        .join(", ") + "."
+      `Message sent to ${recipientCount} recipient(s) via ${methodList}.`
     );
+
+    // Reset selections
     setSelectedStudents([]);
     setSelectedParents([]);
+    setSendToAllParents(false);
+    setSendToSGBMembers(false);
+    setSendToTeachers(false);
     setMethods({ sms: false, whatsapp: false, email: false });
     setMessage('');
     setSearchTerm('');
@@ -143,8 +207,42 @@ export default function CommunicationDemo() {
       <BackButton />
       <h1 className="text-3xl font-bold text-gray-900 mb-4">Admin Communication</h1>
       <p className="mb-6 text-gray-600">
-        Send communication to parents via SMS, WhatsApp, or Email.
+        Send communication to parents, SGB members, and teachers via SMS, WhatsApp, or Email.
       </p>
+
+      {/* Recipient Groups */}
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold mb-2">Select Recipient Groups</h2>
+        <div className="flex gap-6">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={sendToAllParents}
+              onChange={() => setSendToAllParents(!sendToAllParents)}
+              className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <span>All Parents</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={sendToSGBMembers}
+              onChange={() => setSendToSGBMembers(!sendToSGBMembers)}
+              className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
+            />
+            <span>SGB Members</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={sendToTeachers}
+              onChange={() => setSendToTeachers(!sendToTeachers)}
+              className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+            />
+            <span>Teachers</span>
+          </label>
+        </div>
+      </div>
 
       {/* Grade Selection */}
       <div className="mb-6">
